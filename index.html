@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Echomir Translator</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20px; }
+    textarea { width: 100%; height: 120px; margin-bottom: 10px; font-size: 16px; }
+    button { margin-right: 10px; padding: 10px 14px; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <h2>Echomir Encoder / Decoder</h2>
+  <textarea id="input" placeholder="Type or paste text here..."></textarea>
+  <button onclick="encode()">Encode</button>
+  <button onclick="decode()">Decode</button>
+  <textarea id="output" placeholder="Result here..." readonly></textarea>
+
+<script>
+const mapping = {
+  A:'L',B:'C',C:'B',D:'J',E:'I',F:'H',G:'G',
+  H:'F',I:'E',J:'D',K:'S',L:'A',M:'Z',N:'X',
+  O:'W',P:'Q',Q:'P',R:'U',S:'K',T:'Y',U:'R',
+  V:'V',W:'O',X:'N',Y:'T',Z:'M'
+};
+
+const reverseMapping = Object.fromEntries(
+  Object.entries(mapping).map(([k,v]) => [v,k])
+);
+
+function convert(text, table) {
+  return text.split('').map(ch => {
+    if (/[a-z]/i.test(ch)) {
+      let newChar = table[ch.toUpperCase()] || ch.toUpperCase();
+      return ch === ch.toLowerCase() ? newChar.toLowerCase() : newChar;
+    }
+    return ch;
+  }).join('');
+}
+
+function encode() {
+  document.getElementById('output').value =
+    convert(document.getElementById('input').value, mapping);
+}
+
+function decode() {
+  document.getElementById('output').value =
+    convert(document.getElementById('input').value, reverseMapping);
+}
+</script>
+
+</body>
+</html>
