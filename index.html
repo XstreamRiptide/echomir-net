@@ -1,53 +1,206 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Xstream's Echomir Translator</title>
-  <style>
-    body { font-family: Arial, sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20px; }
-    textarea { width: 100%; height: 120px; margin-bottom: 10px; font-size: 16px; }
-    button { margin-right: 10px; padding: 10px 14px; font-size: 16px; }
-  </style>
+<meta charset="UTF-8">
+<title>Echomir Translator</title>
+<style>
+body {
+  background: #000;
+  color: #39ff14;
+  font-family: "Courier New", monospace;
+  text-align: center;
+  padding: 20px;
+  text-shadow:
+    0 0 1px #39ff14,
+    0 0 3px #39ff14,
+    0 0 6px #00ff88;
+}
+
+h1, .collapsible, .challenge-title {
+  font-size: 2em;
+  text-decoration: underline;
+  text-shadow:
+    0 0 3px #39ff14,
+    0 0 6px #00ff88,
+    0 0 12px #00ff88;
+}
+
+.collapsible {
+  cursor: pointer;
+  user-select: none;
+}
+
+.collapsible::after {
+  content: ' ▼';
+  font-size: 0.8em;
+}
+
+.collapsible.active::after {
+  content: ' ▲';
+}
+
+.collapsible-content {
+  max-height: 0;
+  overflow: hidden;
+  text-align: left;
+  margin: 10px auto;
+  width: 80%;
+  transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+}
+
+textarea {
+  width: 80%;
+  height: 100px;
+  background: #000;
+  color: #39ff14;
+  border: 1px solid #39ff14;
+  padding: 10px;
+  margin: 10px 0;
+  text-shadow: 0 0 3px #39ff14;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+button {
+  background: #001a0f;
+  color: #39ff14;
+  border: 1px solid #39ff14;
+  padding: 10px 15px;
+  margin: 5px;
+  cursor: pointer;
+  text-shadow: 0 0 3px #39ff14;
+  box-shadow: 0 0 6px #00ff88 inset, 0 0 6px #00ff88;
+}
+
+button:hover {
+  background: #00331f;
+  box-shadow: 0 0 10px #00ff88;
+}
+
+.button-container {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+table {
+  margin: 0 auto;
+  border-collapse: collapse;
+  text-shadow: 0 0 3px #39ff14;
+}
+
+td {
+  border: 1px solid #39ff14;
+  padding: 4px 8px;
+}
+
+.footer {
+  margin-top: 40px;
+  font-size: 12px;
+  opacity: 0.6;
+  text-shadow: 0 0 3px #39ff14;
+}
+</style>
 </head>
-  <div style="position:fixed; bottom:10px; right:10px; z-index:1000;">
-  <img src="https://visitor-badge.laobi.icu/badge?page_id=echomir.echomir" alt="visitor counter"/>
-  </div>
 <body>
-  <h2>Xstream's Echomir Encoder / Decoder</h2>
-  <textarea id="input" placeholder="Type or paste text here..."></textarea>
-  <button onclick="encode()">Encode</button>
-  <button onclick="decode()">Decode</button>
-  <textarea id="output" placeholder="Result here..." readonly></textarea>
+
+<h1>Echomir Translator</h1>
+
+<textarea id="inputText" oninput="convertText()" placeholder="Type or paste text here..."></textarea>
+
+<div class="button-container">
+  <button onclick="copyText()">📋 Copy Result</button>
+  <button onclick="randomPhrase()">🎲 Random Phrase</button>
+</div>
+
+<h2>Output</h2>
+<textarea id="outputText" readonly></textarea>
+
+<div class="section">
+  <!-- Echomir Challenge visible by default -->
+  <h2 class="challenge-title">Echomir Challenge</h2>
+  <p><strong>Yflxs twr hwu yutexg wry yfi Ibfwzeu Yulxkalywu!</strong></p>
+  <p>Can you decode it?</p>
+
+  <!-- Collapsible sections -->
+  <div class="collapsible">What is Echomir?</div>
+  <div class="collapsible-content">
+    <p>Echomir is a mirrored alphabet language where letters reflect across a keyboard centerline. It preserves English structure while transforming its appearance into an encoded form.</p>
+  </div>
+
+  <div class="collapsible">Echomir Alphabet</div>
+  <div class="collapsible-content">
+    <table>
+      <tr><td>A ↔ L</td><td>B ↔ C</td><td>D ↔ J</td><td>E ↔ I</td></tr>
+      <tr><td>F ↔ H</td><td>G ↔ G</td><td>K ↔ S</td><td>M ↔ Z</td></tr>
+      <tr><td>N ↔ X</td><td>O ↔ W</td><td>P ↔ Q</td><td>R ↔ U</td></tr>
+      <tr><td>T ↔ Y</td><td>V ↔ V</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="footer">
+  Echomir Translator v1.2 — Created by Xstream
+  <div style="margin-top: 5px;">
+    <img src="https://visitor-badge.laobi.icu/badge?page_id=echomir.echomir" alt="visitor counter"/>
+  </div>
+</div>
 
 <script>
-const mapping = {
-  A:'L',B:'C',C:'B',D:'J',E:'I',F:'H',G:'G',
-  H:'F',I:'E',J:'D',K:'S',L:'A',M:'Z',N:'X',
-  O:'W',P:'Q',Q:'P',R:'U',S:'K',T:'Y',U:'R',
-  V:'V',W:'O',X:'N',Y:'T',Z:'M'
+const map = {
+A:'L',B:'C',C:'B',D:'J',E:'I',F:'H',G:'G',
+H:'F',I:'E',J:'D',K:'S',L:'A',M:'Z',N:'X',
+O:'W',P:'Q',Q:'P',R:'U',S:'K',T:'Y',U:'R',
+V:'V',W:'O',X:'N',Y:'T',Z:'M'
 };
+const reverseMap = Object.fromEntries(Object.entries(map).map(([k,v]) => [v,k]));
 
-const reverseMapping = Object.fromEntries(
-  Object.entries(mapping).map(([k,v]) => [v,k])
-);
-
-function convert(text, table) {
-  return text.split('').map(ch => {
+function convertText() {
+  const input = document.getElementById("inputText").value;
+  let result = "";
+  for (let ch of input) {
     if (/[a-z]/i.test(ch)) {
-      let newChar = table[ch.toUpperCase()] || ch.toUpperCase();
-      return ch === ch.toLowerCase() ? newChar.toLowerCase() : newChar;
+      const upper = ch.toUpperCase();
+      const converted = map[upper] || reverseMap[upper] || upper;
+      result += ch === ch.toLowerCase() ? converted.toLowerCase() : converted;
+    } else {
+      result += ch;
     }
-    return ch;
-  }).join('');
+  }
+  document.getElementById("outputText").value = result;
 }
 
-function encode() {
-  document.getElementById('output').value =
-    convert(document.getElementById('input').value, mapping);
+function copyText() {
+  const output = document.getElementById("outputText");
+  output.select();
+  document.execCommand("copy");
 }
 
-function decode() {
-  document.getElementById('output').value =
-    convert(document.getElementById('input').value, reverseMapping);
+function randomPhrase() {
+  const phrases = [
+    "Kibuiyk feji ex qalex kegfy",
+    "Words shape reality",
+    "Jibwji yfi zeuuwu",
+    "The message is hidden"
+  ];
+  document.getElementById("inputText").value =
+    phrases[Math.floor(Math.random() * phrases.length)];
+  convertText();
+}
+
+const collapsibles = document.getElementsByClassName("collapsible");
+for (let i = 0; i < collapsibles.length; i++) {
+  collapsibles[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    const content = this.nextElementSibling;
+    if (content.style.maxHeight) {
+      content.style.maxHeight = null;
+      content.style.padding = "0 0";
+    } else {
+      content.style.maxHeight = content.scrollHeight + "px";
+      content.style.padding = "10px 0";
+    }
+  });
 }
 </script>
 
