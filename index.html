@@ -2,209 +2,319 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Echomir Translator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Translate text into Echomir, a reversible mirrored keyboard cipher created by Xstream.">
+<meta name="theme-color" content="#090d0a">
+<title>Echomir — Mirrored Keyboard Translator</title>
 <style>
-body {
-  background: #000;
-  color: #39ff14;
-  font-family: "Courier New", monospace;
-  text-align: center;
-  padding: 20px;
-}
-
-h1, .collapsible, .challenge-title {
-  font-size: 2em;
-  text-decoration: underline;
-}
-
-.collapsible {
-  cursor: pointer;
-  user-select: none;
-}
-
-.collapsible::after {
-  content: ' ▼';
-  font-size: 0.8em;
-}
-
-.collapsible.active::after {
-  content: ' ▲';
-}
-
-.collapsible-content {
-  max-height: 0;
-  overflow: hidden;
-  text-align: left;
-  margin: 10px auto;
-  width: 80%;
-  transition: max-height 0.3s ease-out, padding 0.3s ease-out;
-}
-
-textarea {
-  width: 80%;
-  height: 100px;
-  background: #000;
-  color: #39ff14;
-  border: 1px solid #39ff14;
-  padding: 10px;
-  margin: 10px 0;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-button {
-  background: #001a0f;
-  color: #39ff14;
-  border: 1px solid #39ff14;
-  padding: 10px 15px;
-  margin: 5px;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #00331f;
-}
-
-.button-container {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-table {
-  margin: 0 auto;
-  border-collapse: collapse;
-}
-
-td {
-  border: 1px solid #39ff14;
-  padding: 4px 8px;
-}
-
-.section {
-  margin-top: 40px;
-}
-
-.footer {
-  margin-top: 40px;
-  font-size: 12px;
-  opacity: 0.7;
+:root { color-scheme:only dark; --bg:#090d0a; --panel:#101813; --line:#3f5946; --green:#c0f2c5; --text:#edf3ee; --muted:#e0e9e2; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--text); font:16px/1.5 "Courier New",monospace; }
+main { width:min(100% - 48px,1040px); margin:auto; }
+header { padding:32px 0 20px; }
+.eyebrow { margin:0 0 8px; font-size:.7rem; letter-spacing:.12em; text-transform:uppercase; color:var(--green); }
+h1 { font-size:clamp(2.4rem,6vw,4rem); letter-spacing:-.065em; line-height:1.05; margin:0 0 10px; color:var(--green); }
+h1 span { color:#80b689; }
+.subtitle { margin:0; color:var(--muted); font-size:.9rem; }
+h2 { font-size:1.15rem; line-height:1.4; margin:0 0 10px; }
+p { margin:0 0 12px; }
+.tabs { display:flex; gap:4px; border-bottom:1px solid var(--line); margin-bottom:20px; }
+.tabs a { text-align:center; text-decoration:none; color:var(--muted); padding:12px 22px; border-bottom:2px solid transparent; font-size:.85rem; }
+.tabs a:hover { color:var(--text); background:var(--panel); }
+.tabs a[aria-selected="true"] { color:var(--green); border-bottom-color:var(--green); background:var(--panel); }
+.tab-panel { margin-bottom:24px; }
+.narrow-panel { max-width:720px; margin-left:auto; margin-right:auto; }
+.workspace,.challenge { border:1px solid var(--line); background:var(--panel); }
+.bar { padding:10px 16px; border-bottom:1px solid var(--line); display:flex; gap:8px 16px; justify-content:space-between; align-items:center; flex-wrap:wrap; font-size:.75rem; color:var(--muted); }
+.live { color:var(--green); white-space:nowrap; }
+.editors { display:grid; grid-template-columns:1fr 1fr; }
+.editor { padding:16px; min-width:0; }
+.editor + .editor { border-left:1px solid var(--line); }
+label { display:block; font-size:.75rem; letter-spacing:.06em; text-transform:uppercase; margin-bottom:8px; color:var(--green); }
+textarea { display:block; width:100%; height:176px; min-height:176px; max-height:480px; resize:none; border:1px solid transparent; border-radius:0; background:transparent; color:var(--text); padding:4px; font:1rem/1.5 "Courier New",monospace; overflow-y:auto; }
+textarea::placeholder,input::placeholder { color:#d7e2d9; opacity:1; }
+#outputText { color:var(--green); }
+.actions { border-top:1px solid var(--line); padding:12px 16px; display:flex; flex-wrap:wrap; gap:10px 20px; align-items:center; }
+.action-group { display:flex; gap:8px; align-items:stretch; }
+.action-group button,.action-group select { min-height:44px; height:100%; }
+.random-group { margin-left:auto; }
+button,.button-link { font:inherit; font-size:.8rem; line-height:1.4; padding:10px 13px; min-height:44px; border:1px solid #65826c; background:transparent; color:var(--text); cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; }
+button:hover,.button-link:hover { background:#243b2b; border-color:var(--green); }
+button.primary { background:var(--green); border-color:var(--green); color:#0a1c0e; font-weight:bold; }
+button.primary:hover { background:#c4f8c9; }
+button:disabled { opacity:.55; cursor:default; }
+:focus-visible { outline:2px solid var(--green); outline-offset:3px; }
+#status { flex-basis:100%; font-size:.75rem; color:var(--muted); }
+#status:empty,.feedback:empty { display:none; }
+.hint { color:var(--muted); font-size:.75rem; margin:10px 0 0; }
+.translator-intro { color:var(--muted); font-size:.85rem; margin-bottom:12px; }
+.challenge { padding:22px; }
+.cipher { color:var(--green); font-size:1.05rem; overflow-wrap:anywhere; margin:16px 0; }
+.small { font-size:.82rem; color:var(--muted); }
+.challenge details { border:0; margin-top:8px; }
+.challenge summary { padding:10px 0; font-size:.82rem; }
+#answer { margin:8px 0 0; overflow-wrap:anywhere; }
+details { border-bottom:1px solid var(--line); }
+summary { padding:14px 0; cursor:pointer; color:var(--green); min-height:44px; }
+.detail-body { padding:0 0 16px; font-size:.9rem; }
+.about-intro { padding:0 0 8px; border-bottom:1px solid var(--line); }
+.alphabet { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-top:12px; }
+.pair { border:1px solid var(--line); padding:6px 3px; text-align:center; white-space:nowrap; }
+.node { border-top:1px solid var(--line); padding:14px 0; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:4px 16px; }
+.node p { margin:0; font-size:.8rem; color:var(--muted); }
+.node a { color:var(--green); text-underline-offset:4px; font-size:.8rem; display:inline-flex; align-items:center; min-height:44px; }
+footer { padding:4px 0 24px; display:flex; gap:12px; flex-wrap:wrap; justify-content:space-between; align-items:center; color:var(--muted); font-size:.7rem; }
+footer img { display:block; max-width:100%; filter:grayscale(1); }
+[hidden] { display:none !important; }
+input,select { font:inherit; color:var(--text); background:var(--bg); border:1px solid var(--line); border-radius:0; padding:10px; max-width:100%; }
+input { width:100%; font-size:1rem; min-height:44px; margin-bottom:10px; }
+select { font-size:.8rem; min-height:44px; }
+.inline-actions { display:flex; flex-wrap:wrap; gap:8px; }
+.feedback { margin:10px 0; }
+.key-row { display:flex; justify-content:center; gap:4px; margin:5px 0; }
+.key { padding:0; flex:0 1 44px; min-width:0; min-height:44px; font-size:.8rem; }
+.key.selected { background:var(--green); color:var(--bg); border-color:var(--green); }
+.share { padding-bottom:4px; }
+.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+@media(max-width:760px) { .actions { display:grid; grid-template-columns:1fr; } .action-group { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); } .random-group { grid-template-columns:1fr 1fr; margin-left:0; } .action-group button,.action-group select { width:100%; min-width:0; } }
+@media(max-width:680px) {
+ main { width:calc(100% - 32px); }
+ header { padding:20px 0 14px; }
+ header .eyebrow { font-size:.62rem; letter-spacing:.08em; }
+ h1 { margin-bottom:8px; }
+ .subtitle { font-size:.8rem; }
+ .tabs { gap:0; margin-bottom:16px; }
+ .tabs a { flex:1; padding:12px 4px; font-size:.75rem; }
+ .editors { grid-template-columns:1fr; }
+ .editor { padding:12px; }
+ .editor + .editor { border-left:0; border-top:1px solid var(--line); }
+ textarea { height:88px; min-height:88px; max-height:320px; }
+ .bar { padding:9px 12px; font-size:.7rem; }
+ .actions { padding:12px; gap:8px; }
+ button { padding:10px; font-size:.78rem; }
+ .challenge { padding:16px; }
+ .challenge .inline-actions { display:grid; grid-template-columns:1fr 1fr; }
+ .tab-panel { margin-bottom:20px; }
+ .node { padding:10px 0; }
+ footer { font-size:.65rem; }
 }
 </style>
 </head>
 <body>
-
-<h1>Echomir Translator</h1>
-
-<textarea id="inputText" oninput="convertText()" placeholder="Type or paste text here..."></textarea>
-
-<div class="button-container">
-  <button onclick="copyText()">📋 Copy Result</button>
-  <button onclick="randomPhrase()">🎲 Random Phrase</button>
+<main>
+<header>
+<p class="eyebrow">The mirrored keyboard cipher</p>
+<h1>Echomir<span>_</span></h1>
+<p class="subtitle">Same letters. Different perspective.</p>
+</header>
+<nav class="tabs" role="tablist" aria-label="Echomir sections">
+<a id="tab-translate" role="tab" href="#translate" aria-controls="panel-translate" aria-selected="true">Translate</a>
+<a id="tab-challenges" role="tab" href="#challenges" aria-controls="panel-challenges" aria-selected="false" tabindex="-1">Challenges</a>
+<a id="tab-about" role="tab" href="#about" aria-controls="panel-about" aria-selected="false" tabindex="-1">About Echomir</a>
+</nav>
+<noscript><p>Enable JavaScript to use the translator and navigation.</p></noscript>
+<div id="panel-translate" class="tab-panel" role="tabpanel" aria-labelledby="tab-translate" tabindex="0">
+<p class="translator-intro">Type English or Echomir. The mirror works both ways.</p>
+<section class="workspace" aria-label="Echomir translator">
+<div class="bar"><span>English ↔ Echomir</span><span class="live">● Live translation</span></div>
+<div class="editors">
+<div class="editor"><label for="inputText">01 / Your text</label><textarea id="inputText" placeholder="Type or paste something to translate…" spellcheck="false" autocapitalize="off" aria-describedby="translationHint"></textarea></div>
+<div class="editor"><label for="outputText">02 / Mirrored result</label><textarea id="outputText" readonly placeholder="Your translation appears here…" spellcheck="false"></textarea></div>
 </div>
-
-<h2>Output</h2>
-<textarea id="outputText" readonly></textarea>
-
-<div class="section">
-  <h2 class="challenge-title">Echomir Challenge</h2>
-  <p><strong>Yflxs twr hwu yutexg wry yfi Ibfwzeu Yulxkalywu!</strong></p>
-  <p>Can you decode it?</p>
-
-  <div class="collapsible">What is Echomir?</div>
-  <div class="collapsible-content">
-    <p>Echomir is a mirrored alphabet language where letters reflect across a keyboard centerline. It preserves English structure while transforming its appearance into an encoded form.</p>
-  </div>
-
-  <div class="collapsible">Echomir Alphabet</div>
-  <div class="collapsible-content">
-    <table>
-      <tr><td>A ↔ L</td><td>B ↔ C</td><td>D ↔ J</td><td>E ↔ I</td></tr>
-      <tr><td>F ↔ H</td><td>G ↔ G</td><td>K ↔ S</td><td>M ↔ Z</td></tr>
-      <tr><td>N ↔ X</td><td>O ↔ W</td><td>P ↔ Q</td><td>R ↔ U</td></tr>
-      <tr><td>T ↔ Y</td><td>V ↔ V</td></tr>
-    </table>
-  </div>
+<div class="actions"><div class="action-group"><button class="primary" id="copyButton" disabled aria-label="Copy translated result">Copy</button><button id="reverseButton" disabled>Reverse</button><button id="clearButton" disabled>Clear</button></div><div class="action-group random-group"><button id="randomButton">Random phrase</button><label class="sr-only" for="phraseLength">Phrase length</label><select id="phraseLength" aria-label="Random phrase length"><option value="all">Any length</option><option value="short">Short</option><option value="medium">Medium</option><option value="long">Long</option></select></div><span id="status" role="status" aria-live="polite"></span></div>
+</section>
+<p class="hint" id="translationHint">Letters change. Capitalization, spaces, numbers, and punctuation stay intact.</p>
 </div>
-
-<div class="section">
-  <h2>Connected Network Node</h2>
-  <p>A live multiplayer network exists within the system.<br>
-  Gamers across all platforms are already synced.</p>
-
-  <p><strong>Node Name:</strong> THE NEXUS<br>
-  <strong>Status:</strong> Online<br>
-  <strong>Access Type:</strong> Discord Gateway</p>
-
-  <a href="https://discord.gg/cRNGFEvrej" target="_blank">
-    <button>ENTER THE NEXUS</button>
-  </a>
+<div id="panel-challenges" class="tab-panel narrow-panel" role="tabpanel" aria-labelledby="tab-challenges" tabindex="0" hidden>
+<section class="challenge" aria-labelledby="challengeTitle">
+<p class="eyebrow">Decode a phrase</p>
+<h2 id="challengeTitle">Echomir Challenge</h2>
+<p class="small" id="challengeIntro">Decode the message below. Capitalization and punctuation don’t count.</p>
+<p class="cipher" id="challengeText"></p>
+<form id="guessForm"><label for="guess">Your answer</label><input id="guess" autocomplete="off" placeholder="What does it say?" required><div class="inline-actions"><button class="primary" type="submit">Check answer</button><button type="button" id="nextChallenge">Next challenge</button></div></form>
+<p class="small feedback" id="guessStatus" role="status"></p>
+<details id="hintDetails"><summary>Show a hint</summary><p class="small" id="hintText"></p></details>
+<details id="answerDetails"><summary>Reveal answer</summary><p id="answer"></p></details>
+<button id="tryButton">Try in translator →</button>
+<details class="share"><summary>Make a challenge to share</summary><label for="shareMessage">Your message</label><input id="shareMessage" maxlength="300" placeholder="Write a message for a friend…"><p class="small">Up to 300 characters. The message is included in the link; it isn’t private.</p><button id="shareButton">Create link</button><label for="shareLink" class="sr-only">Challenge link</label><input id="shareLink" readonly hidden><button id="copyLinkButton" hidden>Copy link</button><p class="small feedback" id="shareStatus" role="status"></p></details>
+</section>
 </div>
-
-<div class="footer">
-  Echomir Translator v1.3 — Created by Xstream
-  <div style="margin-top: 5px;">
-    <img src="https://visitor-badge.laobi.icu/badge?page_id=echomir.echomir" alt="visitor counter"/>
-  </div>
+<div id="panel-about" class="tab-panel narrow-panel" role="tabpanel" aria-labelledby="tab-about" tabindex="0" hidden>
+<section aria-label="About Echomir">
+<div class="about-intro"><h2>What is Echomir?</h2><div class="detail-body"><p>Echomir is a mirrored alphabet cipher created by Xstream. Letters are paired across a phone keyboard’s centerline, giving familiar words an unfamiliar appearance.</p><p>It preserves the structure of your text. Every pairing works in both directions, so the same translator encodes and decodes.</p><p class="small">A creative way to write and share messages—not encryption for private information.</p></div></div>
+<details><summary>Explore the keyboard</summary><div class="detail-body"><p class="small">Tap a letter to find its partner. You can also hover or use your keyboard to focus a key.</p><div id="keyboard" aria-label="Mirrored keyboard"></div><p id="keyStatus" class="small feedback" aria-live="polite">G and V stay themselves.</p></div></details><details><summary>Echomir Alphabet</summary><div class="detail-body"><p>Each letter becomes its partner. G and V stay themselves.</p><div class="alphabet" id="alphabet" aria-label="Letter pairs"></div></div></details>
+</section>
 </div>
-
+<aside class="node" aria-label="The Nexus community">
+<p>Game across platforms with our community.</p>
+<a href="https://discord.gg/cRNGFEvrej" target="_blank" rel="noopener noreferrer" aria-label="Join The Nexus (opens in a new tab)">Join The Nexus ↗</a>
+</aside>
+<footer><span>Echomir Translator V2.0 · Created by Xstream</span><img src="https://visitor-badge.laobi.icu/badge?page_id=echomir.echomir" alt="Echomir visit counter" title="Counts badge loads, including repeat visits and previews"></footer>
+</main>
 <script>
-const map = {
-A:'L',B:'C',C:'B',D:'J',E:'I',F:'H',G:'G',
-H:'F',I:'E',J:'D',K:'S',L:'A',M:'Z',N:'X',
-O:'W',P:'Q',Q:'P',R:'U',S:'K',T:'Y',U:'R',
-V:'V',W:'O',X:'N',Y:'T',Z:'M'
-};
-const reverseMap = Object.fromEntries(Object.entries(map).map(([k,v]) => [v,k]));
-
-function convertText() {
-  const input = document.getElementById("inputText").value;
-  let result = "";
-  for (let ch of input) {
-    if (/[a-z]/i.test(ch)) {
-      const upper = ch.toUpperCase();
-      const converted = map[upper] || reverseMap[upper] || upper;
-      result += ch === ch.toLowerCase() ? converted.toLowerCase() : converted;
-    } else {
-      result += ch;
-    }
-  }
-  document.getElementById("outputText").value = result;
-}
-
-function copyText() {
-  const output = document.getElementById("outputText");
-  output.select();
-  document.execCommand("copy");
-}
-
-function randomPhrase() {
-  const phrases = [
-    "Kibuiyk feji ex qalex kegfy",
-    "Words shape reality",
-    "Jibwji yfi zeuuwu",
-    "The message is hidden"
-  ];
-  document.getElementById("inputText").value =
-    phrases[Math.floor(Math.random() * phrases.length)];
-  convertText();
-}
-
-const collapsibles = document.getElementsByClassName("collapsible");
-for (let i = 0; i < collapsibles.length; i++) {
-  collapsibles[i].addEventListener("click", function() {
-    this.classList.toggle("active");
-    const content = this.nextElementSibling;
-    if (content.style.maxHeight) {
-      content.style.maxHeight = null;
-      content.style.padding = "0 0";
-    } else {
-      content.style.maxHeight = content.scrollHeight + "px";
-      content.style.padding = "10px 0";
-    }
+'use strict';
+const map = {A:'L',B:'C',C:'B',D:'J',E:'I',F:'H',G:'G',H:'F',I:'E',J:'D',K:'S',L:'A',M:'Z',N:'X',O:'W',P:'Q',Q:'P',R:'U',S:'K',T:'Y',U:'R',V:'V',W:'O',X:'N',Y:'T',Z:'M'};
+const $ = id => document.getElementById(id);
+function translate(text) { return text.replace(/[a-z]/gi, ch => ch === ch.toLowerCase() ? map[ch.toUpperCase()].toLowerCase() : map[ch]); }
+function fitTranslator() {
+  if ($('panel-translate').hidden) return;
+  const fields = [$('inputText'), $('outputText')];
+  fields.forEach(field => {
+    field.style.height = 'auto';
+    field.style.height = field.scrollHeight + 'px';
   });
 }
-</script>
+window.addEventListener('resize', fitTranslator);
+function convertText() {
+  $('outputText').value = translate($('inputText').value);
+  for (const id of ['copyButton','reverseButton','clearButton']) $(id).disabled = !$('inputText').value;
+  $('status').textContent = '';
+  fitTranslator();
+}
+$('inputText').addEventListener('input', convertText);
+async function copyField(field, status) {
+  try {
+    if (!navigator.clipboard || !window.isSecureContext) throw Error();
+    await navigator.clipboard.writeText(field.value);
+    status.textContent = 'Copied to clipboard.';
+  } catch {
+    field.focus(); field.select();
+    try { if (!document.execCommand('copy')) throw Error(); status.textContent = 'Copied to clipboard.'; }
+    catch { status.textContent = 'Select the text and copy it manually.'; }
+  }
+}
+$('copyButton').addEventListener('click', () => copyField($('outputText'), $('status')));
+$('reverseButton').addEventListener('click', () => { $('inputText').value = $('outputText').value; convertText(); $('inputText').focus(); });
+$('clearButton').addEventListener('click', () => { $('inputText').value=''; convertText(); $('inputText').focus(); $('status').textContent='Cleared.'; });
+const phrases = [
+  'Kibuiyk feji ex qalex kegfy','Words shape reality','Jibwji yfi zeuuwu','The message is hidden',
+  'Hello world','Look closer','Stay curious','Through the mirror',
+  'Every letter has a partner','Some things are worth a second look','Meet me on the other side',
+  'A familiar world looks different from the other side of the mirror.',
+  'Leave a message for someone who knows where to look.',
+  'The letters have changed, but the story is still yours to tell.'
+];
+function phraseSize(p) { return p.length <= 18 ? 'short' : p.length <= 40 ? 'medium' : 'long'; }
+$('randomButton').addEventListener('click', () => {
+  const length=$('phraseLength').value;
+  const choices=phrases.filter(p => p !== $('inputText').value && (length === 'all' || phraseSize(p) === length));
+  $('inputText').value=choices[Math.floor(Math.random()*choices.length)]; convertText();
+});
+const challenges=[
+  {answer:'Look closer',hint:'An invitation to pay attention.'},
+  {answer:'Words shape reality',hint:'Something language can do.'},
+  {answer:'The message is hidden',hint:'A description of this puzzle.'},
+  {answer:'G and V stay themselves',hint:'Two letters are their own reflections.'},
+  {answer:'Meet me on the other side',hint:'An invitation to cross over.'},
+  {answer:'Every letter has a partner',hint:'The rule behind Echomir, with two self-pairings.'},
+  {answer:translate('Yflxs twr hwu yutexg wry yfi Ibfwzeu Yulxkalywu!'),hint:'A thank-you message from the creator.'},
+  {answer:'Leave a message for someone who knows where to look',hint:'A suggestion for your next puzzle.'}
+];
+let challengeIndex=0, currentChallenge=challenges[0];
+function normalizeAnswer(text) { return text.normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]/gu,''); }
+function showChallenge(challenge, shared=false) {
+  currentChallenge=challenge;
+  $('challengeText').textContent=translate(challenge.answer);
+  $('answer').textContent=challenge.answer;
+  $('hintText').textContent=challenge.hint;
+  $('guess').value=''; $('guessStatus').textContent='';
+  $('hintDetails').open=false; $('answerDetails').open=false;
+  $('challengeTitle').textContent=shared?'A challenge for you':'Echomir Challenge';
+}
+$('guessForm').addEventListener('submit', event => {
+  event.preventDefault();
+  const guess=normalizeAnswer($('guess').value);
+  $('guessStatus').textContent=!guess?'Type your answer first.':guess === normalizeAnswer(currentChallenge.answer)?'Decoded. You got it!':'Not quite. Try again, or take a hint.';
+});
+$('nextChallenge').addEventListener('click', () => {
+  challengeIndex=(challengeIndex+1)%challenges.length;
+  showChallenge(challenges[challengeIndex]);
+});
+$('tryButton').addEventListener('click', () => { $('inputText').value=translate(currentChallenge.answer); convertText(); navigateTab('translate'); $('inputText').focus(); });
+function makeChallengeLink(message) {
+  const url=new URL(location.protocol==='https:' || location.protocol==='http:' ? location.href : 'https://echomir.net/');
+  url.search=''; url.hash=new URLSearchParams({challenge:translate(message)}).toString();
+  return url.href;
+}
+$('shareMessage').addEventListener('input', () => { $('shareLink').hidden=true; $('copyLinkButton').hidden=true; $('shareStatus').textContent=''; });
+$('shareButton').addEventListener('click', () => {
+  const message=$('shareMessage').value.trim();
+  if (!normalizeAnswer(message)) { $('shareStatus').textContent='Write a message with at least one letter or number.'; return; }
+  if(message.length>300) { $('shareStatus').textContent='Keep your message to 300 characters.'; return; }
+  $('shareLink').value=makeChallengeLink(message); $('shareLink').hidden=false; $('copyLinkButton').hidden=false;
+  $('shareStatus').textContent=location.protocol==='file:'?'This link will work once this version is live on echomir.net.':'Your challenge link is ready.';
+});
+$('copyLinkButton').addEventListener('click', () => copyField($('shareLink'), $('shareStatus')));
+let loadedChallenge = null;
+function loadSharedChallenge() {
+  const encoded=new URLSearchParams(location.hash.slice(1)).get('challenge');
+  if(encoded === null) return;
+  if(encoded.length>300 || !normalizeAnswer(encoded)) { $('guessStatus').textContent='This challenge link is invalid. Try the puzzle above instead.'; return; }
+  if (encoded === loadedChallenge) return;
+  loadedChallenge = encoded;
+  showChallenge({answer:translate(encoded),hint:'Each letter has a mirrored partner. Use the keyboard to work through the message.'},true);
 
+}
+const keys=[];
+function highlightKey(letter) {
+  keys.forEach(key => key.classList.toggle('selected',key.textContent===letter || key.textContent===map[letter]));
+  $('keyStatus').textContent=letter===map[letter]?letter+' stays itself.':letter+' ↔ '+map[letter]+' — each becomes the other.';
+}
+for(const row of ['QWERTYUIOP','ASDFGHJKL','ZXCVBNM']) {
+  const container=document.createElement('div'); container.className='key-row';
+  for(const letter of row) {
+    const key=document.createElement('button'); key.type='button'; key.className='key'; key.textContent=letter;
+    key.setAttribute('aria-label',letter+' maps to '+map[letter]);
+    for(const event of ['click','mouseenter','focus']) key.addEventListener(event,()=>highlightKey(letter));
+    keys.push(key); container.append(key);
+  }
+  $('keyboard').append(container);
+}
+const seen=new Set();
+for(const [letter,partner] of Object.entries(map)) {
+  if(seen.has(letter)) continue;
+  seen.add(letter); seen.add(partner);
+  const pair=document.createElement('span'); pair.className='pair'; pair.textContent=letter+' ↔ '+partner; $('alphabet').append(pair);
+}
+const tabNames = ['translate','challenges','about'];
+let challengeHash = '#challenges';
+function renderRoute() {
+  const hash = location.hash;
+  const shared = new URLSearchParams(hash.slice(1)).has('challenge');
+  const name = shared ? 'challenges' : tabNames.includes(hash.slice(1)) ? hash.slice(1) : 'translate';
+  for (const tab of tabNames) {
+    const selected = tab === name;
+    $('panel-' + tab).hidden = !selected;
+    $('tab-' + tab).setAttribute('aria-selected', String(selected));
+    $('tab-' + tab).tabIndex = selected ? 0 : -1;
+  }
+  if (shared) { challengeHash = hash; loadSharedChallenge(); }
+  if (name === 'translate') fitTranslator();
+}
+function navigateTab(name) {
+  const hash = name === 'challenges' ? challengeHash : '#' + name;
+  if (location.hash !== hash) history.pushState(null, '', hash);
+  renderRoute();
+}
+for (const [index, name] of tabNames.entries()) {
+  const tab = $('tab-' + name);
+  tab.addEventListener('click', event => {
+    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button > 0) return;
+    event.preventDefault(); navigateTab(name);
+  });
+  tab.addEventListener('keydown', event => {
+    let target;
+    if (event.key === 'ArrowRight') target = (index + 1) % tabNames.length;
+    else if (event.key === 'ArrowLeft') target = (index + tabNames.length - 1) % tabNames.length;
+    else if (event.key === 'Home') target = 0;
+    else if (event.key === 'End') target = tabNames.length - 1;
+    else return;
+    event.preventDefault(); navigateTab(tabNames[target]); $('tab-' + tabNames[target]).focus();
+  });
+}
+convertText(); showChallenge(challenges[0]); renderRoute();
+window.addEventListener('hashchange', renderRoute);
+window.addEventListener('popstate', renderRoute);
+</script>
 </body>
 </html>
